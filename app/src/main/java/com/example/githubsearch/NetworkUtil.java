@@ -1,12 +1,19 @@
 package com.example.githubsearch;
 
 import android.net.Uri;
+import android.text.TextUtils;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class NetworkUtil {
@@ -46,5 +53,28 @@ public class NetworkUtil {
         }finally{
             urlConnection.disconnect();
         }
+    }
+    public static List<GithubRepository> parsegithubrepos(String repoJson)
+    {
+        List<GithubRepository> repositories=new ArrayList<>();
+        if(TextUtils.isEmpty(repoJson))
+            return repositories;
+        try{
+            JSONObject root=new JSONObject(repoJson);
+            JSONArray repoArray=root.getJSONArray("items");
+            for(int i=0;i<repoArray.length();i++)
+            {
+                JSONObject repo=repoArray.getJSONObject(i);
+                Integer id=repo.getInt("id");
+                String name=repo.getString("name");
+                String desc=repo.getString("description");
+                repositories.add(new GithubRepository(id,name,desc));
+
+            }
+        }catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return repositories;
+
     }
 }
